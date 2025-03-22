@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Smart Traffic Tracker</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+</head>
+<body>
+    <h1>Live Traffic Updates</h1>
+    <form id="traffic-form">
+        <input type="text" id="origin" placeholder="Enter starting point">
+        <input type="text" id="destination" placeholder="Enter destination">
+        <button type="submit">Check Traffic</button>
+    </form>
+
+    <div id="traffic-info"></div>
+
+    <script>
+        var socket = io();
+        document.getElementById("traffic-form").addEventListener("submit", function(event) {
+            event.preventDefault();
+            let origin = document.getElementById("origin").value;
+            let destination = document.getElementById("destination").value;
+
+            fetch(`/get_traffic?origin=${origin}&destination=${destination}`)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById("traffic-info").innerHTML = `
+                        <p>Distance: ${data.distance}</p>
+                        <p>Duration: ${data.duration}</p>
+                        <p>Duration in Traffic: ${data.duration_in_traffic}</p>
+                    `;
+                });
+        });
+
+        socket.on('traffic_update', function(data) {
+            document.getElementById("traffic-info").innerHTML = `
+                <p>Updated Traffic Info:</p>
+                <p>Distance: ${data.distance}</p>
+                <p>Duration: ${data.duration}</p>
+                <p>Duration in Traffic: ${data.duration_in_traffic}</p>
+            `;
+        });
+    </script>
+</body>
+</html>
